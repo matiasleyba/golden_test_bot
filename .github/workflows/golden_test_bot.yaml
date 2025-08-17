@@ -15,24 +15,38 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.8'
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
       - name: Set up Git
         run: |
           git config user.name "golden-bot"
           git config user.email "golden-bot@users.noreply.github.com"
 
+      - name: Generate golden images
+        run: |
+          # Run golden tests to generate/update golden images
+          flutter test --update-goldens --run-skipped
+
       - name: Detect golden changes
         id: detect
         run: |
-          # Path to your goldens
-          GOLDEN_PATH="test/goldens"
+          # Path to your test folder (checking all golden files)
+          TEST_PATH="test"
 
           # Base and head commits
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha }}"
 
-          # Detect changes
+          # Detect changes in test folder
           git fetch origin $BASE_SHA
-          git diff --name-status $BASE_SHA $HEAD_SHA -- $GOLDEN_PATH > golden_changes.txt || true
+          git diff --name-status $BASE_SHA $HEAD_SHA -- $TEST_PATH > golden_changes.txt || true
 
           echo "changes<<EOF" >> $GITHUB_OUTPUT
           cat golden_changes.txt >> $GITHUB_OUTPUT
@@ -41,9 +55,10 @@ jobs:
       - name: Parse golden changes
         id: parse
         run: |
-          ADDED=$(grep -c "^A" golden_changes.txt || true)
-          MODIFIED=$(grep -c "^M" golden_changes.txt || true)
-          REMOVED=$(grep -c "^D" golden_changes.txt || true)
+          # Filter for .png files which are golden files
+          ADDED=$(grep "^A.*\.png$" golden_changes.txt | wc -l || true)
+          MODIFIED=$(grep "^M.*\.png$" golden_changes.txt | wc -l || true)
+          REMOVED=$(grep "^D.*\.png$" golden_changes.txt | wc -l || true)
 
           echo "added=$ADDED" >> $GITHUB_OUTPUT
           echo "modified=$MODIFIED" >> $GITHUB_OUTPUT
@@ -56,7 +71,8 @@ jobs:
           GOLDEN_BRANCH="golden-updates/$PR_NUMBER"
 
           git checkout -b $GOLDEN_BRANCH
-          git add test/goldens
+          # Add all .png files in test directory
+          find test -name "*.png" -exec git add {} \; || echo "No .png files found"
           git commit -m "Update goldens for PR #$PR_NUMBER" || echo "No changes to commit"
           git push origin $GOLDEN_BRANCH --force
 
