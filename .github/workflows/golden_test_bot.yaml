@@ -18,7 +18,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.8'
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: Get dependencies
@@ -44,21 +44,37 @@ jobs:
           BASE_SHA="${{ github.event.pull_request.base.sha }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha }}"
 
-          # Detect changes in test folder
+          echo "Checking for golden changes..."
+          echo "Base SHA: $BASE_SHA"
+          echo "Head SHA: $HEAD_SHA"
+          echo "Test path: $TEST_PATH"
+
+          # Detect changes in test folder (focusing on .png files which are golden files)
           git fetch origin $BASE_SHA
-          git diff --name-status $BASE_SHA $HEAD_SHA -- $TEST_PATH > golden_changes.txt || true
+          git add $TEST_PATH
+          git diff --name-status $BASE_SHA $HEAD_SHA -- $TEST_PATH > golden_changes.txt || echo "No changes found or error occurred"
+          
+          echo "=== Golden changes detected ==="
+          cat golden_changes.txt || echo "No golden_changes.txt file found"
+          echo "================================"
 
           echo "changes<<EOF" >> $GITHUB_OUTPUT
-          cat golden_changes.txt >> $GITHUB_OUTPUT
+          cat golden_changes.txt >> $GITHUB_OUTPUT 2>/dev/null || echo "No changes" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Parse golden changes
         id: parse
         run: |
+          echo "=== Parsing golden changes ==="
+          
           # Filter for .png files which are golden files
-          ADDED=$(grep "^A.*\.png$" golden_changes.txt | wc -l || true)
-          MODIFIED=$(grep "^M.*\.png$" golden_changes.txt | wc -l || true)
-          REMOVED=$(grep "^D.*\.png$" golden_changes.txt | wc -l || true)
+          ADDED=$(grep "^A.*\.png$" golden_changes.txt 2>/dev/null | wc -l || echo "0")
+          MODIFIED=$(grep "^M.*\.png$" golden_changes.txt 2>/dev/null | wc -l || echo "0")
+          REMOVED=$(grep "^D.*\.png$" golden_changes.txt 2>/dev/null | wc -l || echo "0")
+
+          echo "Added: $ADDED"
+          echo "Modified: $MODIFIED"
+          echo "Removed: $REMOVED"
 
           echo "added=$ADDED" >> $GITHUB_OUTPUT
           echo "modified=$MODIFIED" >> $GITHUB_OUTPUT
@@ -67,13 +83,23 @@ jobs:
       - name: Create golden branch
         if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
         run: |
+          echo "Creating golden branch..."
           PR_NUMBER=${{ github.event.pull_request.number }}
           GOLDEN_BRANCH="golden-updates/$PR_NUMBER"
 
+          echo "Branch name: $GOLDEN_BRANCH"
+          echo "PR number: $PR_NUMBER"
+
           git checkout -b $GOLDEN_BRANCH
-          # Add all .png files in test directory
-          find test -name "*.png" -exec git add {} \; || echo "No .png files found"
+          
+          echo "Finding .png files in test directory..."
+          find test -name "*.png" -exec echo "Found: {}" \;
+          find test -name "*.png" -exec git add {} \; || echo "No .png files found or error occurred"
+          
+          echo "Committing changes..."
           git commit -m "Update goldens for PR #$PR_NUMBER" || echo "No changes to commit"
+          
+          echo "Pushing branch..."
           git push origin $GOLDEN_BRANCH --force
 
           echo "golden_branch=$GOLDEN_BRANCH" >> $GITHUB_ENV
@@ -93,3 +119,12 @@ jobs:
             A branch with the updated goldens has been created:
 
             👉 [Compare changes](https://github.com/${{ github.repository }}/compare/${{ github.event.pull_request.head.ref }}...${{ env.golden_branch }})
+
+      - name: Debug - Show outputs
+        run: |
+          echo "=== Debug Information ==="
+          echo "Added: ${{ steps.parse.outputs.added }}"
+          echo "Modified: ${{ steps.parse.outputs.modified }}"
+          echo "Removed: ${{ steps.parse.outputs.removed }}"
+          echo "Golden branch: ${{ env.golden_branch }}"
+          echo "========================"
