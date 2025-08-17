@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
@@ -22,7 +22,6 @@ jobs:
           channel: 'stable'
           cache: true
           cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash
-          cache-path: ${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch
 
       - name: Get dependencies
         run: flutter pub get
