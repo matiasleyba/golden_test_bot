@@ -1,0 +1,4 @@
+tags:
+  golden:
+    skip: "Skipping golden tests since they are handled by the golden-bot workflow"
+    description: "Golden tests"
