@@ -1,0 +1,79 @@
+name: Golden Test Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  golden-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Set up Git
+        run: |
+          git config user.name "golden-bot"
+          git config user.email "golden-bot@users.noreply.github.com"
+
+      - name: Detect golden changes
+        id: detect
+        run: |
+          # Path to your goldens
+          GOLDEN_PATH="test/goldens"
+
+          # Base and head commits
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          # Detect changes
+          git fetch origin $BASE_SHA
+          git diff --name-status $BASE_SHA $HEAD_SHA -- $GOLDEN_PATH > golden_changes.txt || true
+
+          echo "changes<<EOF" >> $GITHUB_OUTPUT
+          cat golden_changes.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Parse golden changes
+        id: parse
+        run: |
+          ADDED=$(grep -c "^A" golden_changes.txt || true)
+          MODIFIED=$(grep -c "^M" golden_changes.txt || true)
+          REMOVED=$(grep -c "^D" golden_changes.txt || true)
+
+          echo "added=$ADDED" >> $GITHUB_OUTPUT
+          echo "modified=$MODIFIED" >> $GITHUB_OUTPUT
+          echo "removed=$REMOVED" >> $GITHUB_OUTPUT
+
+      - name: Create golden branch
+        if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          GOLDEN_BRANCH="golden-updates/$PR_NUMBER"
+
+          git checkout -b $GOLDEN_BRANCH
+          git add test/goldens
+          git commit -m "Update goldens for PR #$PR_NUMBER" || echo "No changes to commit"
+          git push origin $GOLDEN_BRANCH --force
+
+          echo "golden_branch=$GOLDEN_BRANCH" >> $GITHUB_ENV
+
+      - name: Comment on PR
+        if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            🟡 Golden test update detected
+
+            - **${{ steps.parse.outputs.added }} new** golden files
+            - **${{ steps.parse.outputs.modified }} modified** golden files
+            - **${{ steps.parse.outputs.removed }} removed** golden files
+
+            A branch with the updated goldens has been created:
+
+            👉 [Compare changes](https://github.com/${{ github.repository }}/compare/${{ github.event.pull_request.head.ref }}...${{ env.golden_branch }})
