@@ -54,7 +54,7 @@ jobs:
           # Detect changes in test folder (focusing on .png files which are golden files)
           git fetch origin $BASE_SHA
           git add $TEST_PATH
-          git diff --name-status $BASE_SHA $HEAD_SHA -- $TEST_PATH > golden_changes.txt || echo "No changes found or error occurred"
+          git diff --name-status $HEAD_SHA -- $TEST_PATH > golden_changes.txt || echo "No changes found or error occurred"
           
           echo "=== Golden changes detected ==="
           cat golden_changes.txt || echo "No golden_changes.txt file found"
