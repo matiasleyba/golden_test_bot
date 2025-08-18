@@ -31,8 +31,8 @@ jobs:
 
       - name: Set up Git
         run: |
-          git config user.name "golden-bot"
-          git config user.email "golden-bot@users.noreply.github.com"
+          git config user.name "golden-tests-bot"
+          git config user.email "golden-tests-bot@users.noreply.github.com"
 
       - name: Generate golden images
         run: |
@@ -114,36 +114,33 @@ jobs:
           echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
           echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
-      - name: Comment on PR
+      - name: Find previous comment
+        id: find_comment
+        uses: peter-evans/find-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'golden-tests-bot'
+          body-includes: '<!-- golden-test-bot-comment -->'
+
+      - name: Create or update comment
         if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
         uses: peter-evans/create-or-update-comment@v4
         with:
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             <!-- golden-test-bot-comment -->
             🟡 **Golden test update detected!**
 
-            **The golden files have been updated. Please review the changes to ensure they are correct.**
-            After this PR is merged, a new PR will be automatically created to update the golden files in the main branch.
+            **I have detected golden test differences and have automatically generated updated golden files for you.**
 
-            **Changes:**
-            - **${{ steps.parse.outputs.added }} new** golden files
-            - **${{ steps.parse.outputs.modified }} modified** golden files
-            - **${{ steps.parse.outputs.removed }} removed** golden files
+            If the visual changes in your PR are intentional, you can use the updated golden files to fix the failing tests.
 
-            A branch with the updated goldens has been created: 👉 [Review changes](https://github.com/${{ github.repository }}/compare/${{ github.event.pull_request.head.ref }}...${{ env.golden_branch }})
+            **To update your golden files:**
+            1. Review the changes: 👉 [Compare golden files](https://github.com/${{ github.repository }}/compare/${{ github.event.pull_request.head.ref }}...${{ env.golden_branch }})
+            2. If the changes look correct, create the PR and merge the golden branch into your PR branch to fix the tests.
 
-            **Commit Details:**
-            - **Commit ID:** `${{ steps.create_golden_branch.outputs.commit_sha }}`
-            - **Commit Message:** `${{ steps.create_golden_branch.outputs.commit_message }}`
+            I'll keep an eye on the PR and will create or modify the goldens if there are any new changes.
 
-          unique: true
+          edit-mode: replace
 
-      - name: Debug - Show outputs
-        run: |
-          echo "=== Debug Information ==="
-          echo "Added: ${{ steps.parse.outputs.added }}"
-          echo "Modified: ${{ steps.parse.outputs.modified }}"
-          echo "Removed: ${{ steps.parse.outputs.removed }}"
-          echo "Golden branch: ${{ env.golden_branch }}"
-          echo "========================"
