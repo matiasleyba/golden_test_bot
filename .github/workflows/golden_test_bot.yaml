@@ -37,7 +37,7 @@ jobs:
       - name: Generate golden images
         run: |
           # Run golden tests to generate/update golden images
-          flutter test --update-goldens --run-skipped
+          flutter test --update-goldens -t "golden"
 
       - name: Detect golden changes
         id: detect
@@ -59,9 +59,7 @@ jobs:
           git add $TEST_PATH
           git diff --name-status $HEAD_SHA -- $TEST_PATH > golden_changes.txt || echo "No changes found or error occurred"
           
-          echo "=== Golden changes detected ==="
           cat golden_changes.txt || echo "No golden_changes.txt file found"
-          echo "================================"
 
           echo "changes<<EOF" >> $GITHUB_OUTPUT
           cat golden_changes.txt >> $GITHUB_OUTPUT 2>/dev/null || echo "No changes" >> $GITHUB_OUTPUT
@@ -69,17 +67,11 @@ jobs:
 
       - name: Parse golden changes
         id: parse
-        run: |
-          echo "=== Parsing golden changes ==="
-          
+        run: |          
           # Filter for .png files which are golden files
           ADDED=$(grep "^A.*\.png$" golden_changes.txt 2>/dev/null | wc -l || echo "0")
           MODIFIED=$(grep "^M.*\.png$" golden_changes.txt 2>/dev/null | wc -l || echo "0")
           REMOVED=$(grep "^D.*\.png$" golden_changes.txt 2>/dev/null | wc -l || echo "0")
-
-          echo "Added: $ADDED"
-          echo "Modified: $MODIFIED"
-          echo "Removed: $REMOVED"
 
           echo "added=$ADDED" >> $GITHUB_OUTPUT
           echo "modified=$MODIFIED" >> $GITHUB_OUTPUT
@@ -119,7 +111,8 @@ jobs:
         uses: peter-evans/find-comment@v3
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          comment-author: 'golden-tests-bot'
+          body-includes: 'Golden test update detected!'
+          
   
       - name: Create or update comment
         if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
@@ -127,6 +120,7 @@ jobs:
         with:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
           body: |
             🟡 **Golden test update detected!**
 
@@ -140,5 +134,4 @@ jobs:
 
             I'll keep an eye on the PR and will create or modify the goldens if there are any new changes.
 
-          edit-mode: replace
 
