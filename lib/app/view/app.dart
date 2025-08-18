@@ -2,7 +2,9 @@ import 'package:app/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({super.key, @visibleForTesting this.home});
+
+  final Widget? home;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class App extends StatelessWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
-      home: const GmailInboxPage(),
+      home: home ?? const GmailInboxPage(),
     );
   }
 }
@@ -94,7 +96,6 @@ class GmailInboxPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.grey.shade200,
-        onPressed: () {},
         icon: const Icon(
           Icons.edit,
         ),
@@ -104,6 +105,9 @@ class GmailInboxPage extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
+        // coverage:ignore-start
+        onPressed: () {},
+        // coverage:ignore-end
       ),
     );
   }
