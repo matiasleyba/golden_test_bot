@@ -86,6 +86,7 @@ jobs:
           echo "removed=$REMOVED" >> $GITHUB_OUTPUT
 
       - name: Create golden branch
+        id: create_golden_branch
         if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
         run: |
           echo "Creating golden branch..."
@@ -102,12 +103,16 @@ jobs:
           find test -name "*.png" -exec git add {} \; || echo "No .png files found or error occurred"
           
           echo "Committing changes..."
-          git commit -m "Update goldens for PR #$PR_NUMBER" || echo "No changes to commit"
+          COMMIT_MESSAGE="chore: Update golden files for PR #$PR_NUMBER"
+          git commit -m "$COMMIT_MESSAGE" || echo "No changes to commit"
           
           echo "Pushing branch..."
           git push origin $GOLDEN_BRANCH --force
 
           echo "golden_branch=$GOLDEN_BRANCH" >> $GITHUB_ENV
+          COMMIT_SHA=$(git rev-parse HEAD)
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
       - name: Comment on PR
         if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
@@ -115,15 +120,24 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            🟡 Golden test update detected
+            <!-- golden-test-bot-comment -->
+            🟡 **Golden test update detected!**
 
+            **The golden files have been updated. Please review the changes to ensure they are correct.**
+            After this PR is merged, a new PR will be automatically created to update the golden files in the main branch.
+
+            **Changes:**
             - **${{ steps.parse.outputs.added }} new** golden files
             - **${{ steps.parse.outputs.modified }} modified** golden files
             - **${{ steps.parse.outputs.removed }} removed** golden files
 
-            A branch with the updated goldens has been created:
+            A branch with the updated goldens has been created: 👉 [Review changes](https://github.com/${{ github.repository }}/compare/${{ github.event.pull_request.head.ref }}...${{ env.golden_branch }})
 
-            👉 [Compare changes](https://github.com/${{ github.repository }}/compare/${{ github.event.pull_request.head.ref }}...${{ env.golden_branch }})
+            **Commit Details:**
+            - **Commit ID:** `${{ steps.create_golden_branch.outputs.commit_sha }}`
+            - **Commit Message:** `${{ steps.create_golden_branch.outputs.commit_message }}`
+
+          unique: true
 
       - name: Debug - Show outputs
         run: |
