@@ -70,10 +70,10 @@ void main() {
           findsOneWidget,
         );
 
-        /// TODO:Check the position of the icons
-        /// TODO: Check the position of the texts
-        /// TODO: Check the size of the logo
-        /// TODO: Check the paddings of the different elements
+        // TODO(matiasleyba): Check the position of the icons
+        // TODO(matiasleyba): Check the position of the texts
+        // TODO(matiasleyba): Check the size of the logo
+        // TODO(matiasleyba): Check the paddings of the different elements
       });
     });
     testWidgets('renders $GmailInboxPage', (tester) async {
