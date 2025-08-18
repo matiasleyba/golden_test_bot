@@ -114,5 +114,5 @@ app.*.map.json
 # Generated l10n files
 lib/l10n/gen/
 
-# golden failures
+# Golden failures
 test/**/failures/
