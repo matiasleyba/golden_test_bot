@@ -22,6 +22,14 @@ void main() {
       });
       await screenMatchesGolden(tester, 'mail_item_unread');
     });
+
+    testGoldens('renders unread favorite $MailItem', (tester) async {
+      await mockNetworkImages(() async {
+        await tester.binding.setSurfaceSize(const Size(400, 80));
+        await tester.pumpApp(const MailItem(isRead: false, isFavorite: true));
+      });
+      await screenMatchesGolden(tester, 'mail_item_unread_favorite');
+    });
   });
   testGoldens('renders $App', (tester) async {
     await mockNetworkImages(() async {
