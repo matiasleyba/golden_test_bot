@@ -120,8 +120,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'golden-tests-bot'
-          body-includes: '<!-- golden-test-bot-comment -->'
-
+  
       - name: Create or update comment
         if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
         uses: peter-evans/create-or-update-comment@v4
@@ -129,7 +128,6 @@ jobs:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            <!-- golden-test-bot-comment -->
             🟡 **Golden test update detected!**
 
             **I have detected golden test differences and have automatically generated updated golden files for you.**
