@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  /*
   testWidgets('$CircularProgressIndicator', skip: true, (tester) async {
     final animationSheet = AnimationSheetBuilder(
       frameSize: const Size(120, 100),
@@ -61,4 +62,5 @@ void main() {
       matchesGoldenFile('goldens/animation_golden_test.png'),
     );
   });
+  */
 }

@@ -135,8 +135,9 @@ void main() {
     });
   });
 
-  group(GmailInboxPage, skip: true, () {
-    group('flutter_test', () {
+  /*
+  group(GmailInboxPage, skip: false, () {
+    group('flutter_test $GmailInboxPage', () {
       testWidgets('renders $GmailInboxPage', (tester) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 800));
@@ -158,7 +159,7 @@ void main() {
       });
     });
 
-    group('golden_toolkit', () {
+    group('golden_toolkit $GmailInboxPage', () {
       testGoldens('renders $GmailInboxPage', (tester) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 800));
@@ -181,7 +182,7 @@ void main() {
       });
     });
 
-    group('alchemist', () {
+    group('alchemist $GmailInboxPage', () {
       goldenTest(
         'renders $GmailInboxPage',
         fileName: 'app_alchemist',
@@ -207,4 +208,5 @@ void main() {
       );
     });
   });
+     */
 }
