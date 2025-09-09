@@ -197,7 +197,7 @@ class MailItem extends StatelessWidget {
             ),
           ),
           if (conversationCount > 0) ...[
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Text(
               '$conversationCount',
               style: TextStyle(
