@@ -9,7 +9,7 @@ import '../../helpers/pump_app.dart';
 void main() {
   group('MailItem golden', () {
     group('flutter_test', skip: false, () {
-      testWidgets('renders unread $MailItem', (tester) async {
+      testWidgets('renders unread $MailItem', tags: 'golden', (tester) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 80));
 
@@ -34,7 +34,9 @@ void main() {
           ),
         );
       });
-      testWidgets('renders unread favorite $MailItem', (tester) async {
+      testWidgets('renders unread favorite $MailItem', tags: 'golden', (
+        tester,
+      ) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 80));
 
@@ -54,7 +56,7 @@ void main() {
           ),
         );
       });
-      testWidgets('renders read $MailItem', (tester) async {
+      testWidgets('renders read $MailItem', tags: 'golden', (tester) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 80));
 
