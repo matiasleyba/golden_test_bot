@@ -27,10 +27,10 @@ void main() {
           );
         });
 
-        expect(
+        await expectLater(
           find.byType(MailItem),
           matchesGoldenFile(
-            'goldens/flutter_test/mail_item_unread_flutter_test.png',
+            'goldens/mail_item_unread_flutter_test.png',
           ),
         );
       });
@@ -47,10 +47,10 @@ void main() {
           await tester.pumpApp(const MailItem(isRead: false, isFavorite: true));
         });
 
-        expect(
+        await expectLater(
           find.byType(MailItem),
           matchesGoldenFile(
-            'goldens/flutter_test/mail_item_unread_favorite_flutter_test.png',
+            'goldens/mail_item_unread_favorite_flutter_test.png',
           ),
         );
       });
@@ -67,14 +67,15 @@ void main() {
           await tester.pumpApp(const MailItem());
         });
 
-        expect(
+        await expectLater(
           find.byType(MailItem),
           matchesGoldenFile(
-            'goldens/flutter_test/mail_item_read_flutter_test.png',
+            'goldens/mail_item_read_flutter_test.png',
           ),
         );
       });
     });
+
     group('golden_toolkit', skip: true, () {
       testGoldens('renders $MailItem variants correctly', (tester) async {
         /// Set surface size
@@ -110,9 +111,8 @@ void main() {
 
     group('alchemist', skip: true, () {
       goldenTest(
-        'renders $MailItem variants correctly',
+        'renders $MailItem variants',
         fileName: 'mail_item',
-        skip: true,
         pumpWidget: (tester, widget) async {
           await mockNetworkImages(() async {
             await tester.pumpWidget(widget);
@@ -120,7 +120,12 @@ void main() {
         },
         builder: () => GoldenTestGroup(
           children: [
-            GoldenTestScenario(name: 'read', child: const MailItem()),
+            GoldenTestScenario(
+              name: 'read',
+              child: const MailItem(
+                conversationCount: 2,
+              ),
+            ),
             GoldenTestScenario(
               name: 'unread',
               child: const MailItem(isRead: false),

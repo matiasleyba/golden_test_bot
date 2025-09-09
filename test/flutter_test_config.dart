@@ -9,11 +9,12 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   /*
   return GoldenToolkit.runWithConfiguration(
     () async {
+      //await loadAppFonts();
       await testMain();
     },
+    config: GoldenToolkitConfiguration(),
   );
-  */
-
+*/
   /*
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig.current().copyWith(
@@ -22,10 +23,13 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         borderColor: Colors.grey.shade200,
         nameTextStyle: const TextStyle(),
       ),
+      ciGoldensConfig: const CiGoldensConfig(
+        // ignore: avoid_redundant_argument_values
+        obscureText: true,
+      ),
     ),
     run: testMain,
   );
-  */
-
+*/
   return testMain();
 }
