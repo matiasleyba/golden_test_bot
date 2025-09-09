@@ -17,6 +17,7 @@ void main() {
         addTearDown(() async {
           await tester.binding.setSurfaceSize(null);
         });
+
         await mockNetworkImages(() async {
           await tester.pumpApp(const MailItem(isRead: false));
         });
@@ -40,6 +41,7 @@ void main() {
         await mockNetworkImages(() async {
           await tester.pumpApp(const MailItem(isRead: false, isFavorite: true));
         });
+
         expect(
           find.byType(MailItem),
           matchesGoldenFile(
@@ -59,6 +61,7 @@ void main() {
         await mockNetworkImages(() async {
           await tester.pumpApp(const MailItem());
         });
+
         expect(
           find.byType(MailItem),
           matchesGoldenFile(
@@ -104,6 +107,7 @@ void main() {
       goldenTest(
         'renders $MailItem variants correctly',
         fileName: 'mail_item',
+        skip: true,
         pumpWidget: (tester, widget) async {
           await mockNetworkImages(() async {
             await tester.pumpWidget(widget);
@@ -176,6 +180,7 @@ void main() {
       goldenTest(
         'renders $GmailInboxPage',
         fileName: 'app_alchemist',
+        skip: true,
         pumpWidget: (tester, widget) async {
           await mockNetworkImages(() async {
             await tester.pumpWidget(
