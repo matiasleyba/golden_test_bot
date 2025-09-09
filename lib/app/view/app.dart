@@ -168,17 +168,22 @@ class MailItem extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       titleAlignment: ListTileTitleAlignment.top,
-      leading: CircleAvatar(
-        radius: 20,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Image.network(
-            'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gmail_icon_%282020%29.svg/2560px-Gmail_icon_%282020%29.svg.png',
-            fit: BoxFit.cover,
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: CircleAvatar(
+          radius: 20,
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Image.network(
+              'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gmail_icon_%282020%29.svg/2560px-Gmail_icon_%282020%29.svg.png',
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),
       title: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (isImportant)
             Icon(
@@ -212,23 +217,27 @@ class MailItem extends StatelessWidget {
           color: !isRead ? Colors.black : Colors.grey,
         ),
       ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            'Sep 10',
-            style: TextStyle(
-              fontWeight: !isRead ? FontWeight.w700 : FontWeight.w400,
-              color: !isRead ? Colors.black : Colors.grey,
+      trailing: SizedBox(
+        width: 80,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Sep 10',
+              style: TextStyle(
+                fontWeight: !isRead ? FontWeight.w700 : FontWeight.w400,
+                color: !isRead ? Colors.black : Colors.grey,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Icon(
-            isFavorite ? Icons.star : Icons.star_border,
-            color: isFavorite ? Colors.yellow.shade700 : Colors.grey,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Icon(
+              isFavorite ? Icons.star : Icons.star_border,
+              color: isFavorite ? Colors.yellow.shade700 : Colors.grey,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:app/app/view/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,24 +9,6 @@ import '../../helpers/pump_app.dart';
 void main() {
   group(MailItem, () {
     group('flutter_test', () {
-      testWidgets('renders $MailItem', (tester) async {
-        /// Set surface size
-        await tester.binding.setSurfaceSize(const Size(400, 80));
-
-        /// Reset surface size
-        addTearDown(() async {
-          await tester.binding.setSurfaceSize(null);
-        });
-
-        /// Pump the app
-        await mockNetworkImages(() async {
-          await tester.pumpApp(const MailItem());
-        });
-        expect(
-          find.byType(MailItem),
-          matchesGoldenFile('goldens/flutter_test/mail_item_flutter_test.png'),
-        );
-      });
       testWidgets('renders unread $MailItem', (tester) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 80));
@@ -37,6 +20,7 @@ void main() {
         await mockNetworkImages(() async {
           await tester.pumpApp(const MailItem(isRead: false));
         });
+
         expect(
           find.byType(MailItem),
           matchesGoldenFile(
@@ -84,81 +68,133 @@ void main() {
       });
     });
     group('golden_toolkit', () {
-      testGoldens('renders $MailItem', (tester) async {
-        await mockNetworkImages(() async {
-          await tester.pumpApp(const MailItem());
-          await tester.binding.setSurfaceSize(const Size(400, 80));
+      testGoldens('renders $MailItem variants correctly', (tester) async {
+        /// Set surface size
+        await tester.binding.setSurfaceSize(const Size(400, 80));
+
+        /// Reset surface size
+        addTearDown(() async {
+          await tester.binding.setSurfaceSize(null);
         });
+        final goldenBuilder = GoldenBuilder.column()
+          ..addScenario(
+            'read',
+            const MailItem(),
+          )
+          ..addScenario(
+            'unread',
+            const MailItem(isRead: false),
+          )
+          ..addScenario(
+            'unread favorite',
+            const MailItem(isRead: false, isFavorite: true),
+          );
+        await mockNetworkImages(() async {
+          await tester.pumpWidgetBuilder(goldenBuilder.build());
+        });
+
         await screenMatchesGolden(
           tester,
           'golden_toolkit/mail_item_golden_toolkit',
         );
       });
+    });
 
-      testGoldens('renders unread $MailItem', (tester) async {
-        await mockNetworkImages(() async {
-          await tester.binding.setSurfaceSize(const Size(400, 80));
-          await tester.pumpApp(const MailItem(isRead: false));
-        });
-        await screenMatchesGolden(
-          tester,
-          'golden_toolkit/mail_item_unread_golden_toolkit',
-        );
-      });
+    group('alchemist', () {
+      goldenTest(
+        'renders $MailItem variants correctly',
+        fileName: 'mail_item',
+        pumpWidget: (tester, widget) async {
+          await mockNetworkImages(() async {
+            await tester.pumpWidget(widget);
+          });
+        },
+        builder: () => GoldenTestGroup(
+          children: [
+            GoldenTestScenario(name: 'read', child: const MailItem()),
+            GoldenTestScenario(
+              name: 'unread',
+              child: const MailItem(isRead: false),
+            ),
+            GoldenTestScenario(
+              name: 'unread favorite',
+              child: const MailItem(isRead: false, isFavorite: true),
+            ),
+          ],
+        ),
+      );
+    });
+  });
 
-      testGoldens('renders unread favorite $MailItem', (tester) async {
-        await mockNetworkImages(() async {
-          await tester.binding.setSurfaceSize(const Size(400, 80));
-          await tester.pumpApp(const MailItem(isRead: false, isFavorite: true));
+  group(GmailInboxPage, () {
+    group('flutter_test', () {
+      testWidgets('renders $GmailInboxPage', (tester) async {
+        /// Set surface size
+        await tester.binding.setSurfaceSize(const Size(400, 800));
+
+        /// Reset surface size
+        addTearDown(() async {
+          await tester.binding.setSurfaceSize(null);
         });
-        await screenMatchesGolden(
-          tester,
-          'golden_toolkit/mail_item_unread_favorite_golden_toolkit',
+
+        await mockNetworkImages(() async {
+          await tester.pumpWidget(
+            const MaterialApp(home: GmailInboxPage()),
+          );
+        });
+        expect(
+          find.byType(GmailInboxPage),
+          matchesGoldenFile('goldens/flutter_test/app_flutter_test.png'),
         );
       });
     });
 
-    group(App, () {
-      group('flutter_test', () {
-        testWidgets('renders $App', (tester) async {
-          /// Set surface size
-          await tester.binding.setSurfaceSize(const Size(400, 800));
+    group('golden_toolkit', () {
+      testGoldens('renders $GmailInboxPage', (tester) async {
+        /// Set surface size
+        await tester.binding.setSurfaceSize(const Size(400, 800));
 
-          /// Reset surface size
-          addTearDown(() async {
-            await tester.binding.setSurfaceSize(null);
-          });
+        /// Reset surface size
+        addTearDown(() async {
+          await tester.binding.setSurfaceSize(null);
+        });
 
-          await mockNetworkImages(() async {
-            await tester.pumpWidget(const App());
-          });
-          expect(
-            find.byType(App),
-            matchesGoldenFile('goldens/flutter_test/app_flutter_test.png'),
+        await mockNetworkImages(() async {
+          await tester.pumpWidget(
+            const App(),
           );
         });
+
+        await screenMatchesGolden(
+          tester,
+          'golden_toolkit/app_golden_toolkit',
+        );
       });
+    });
 
-      group('golden_toolkit', () {
-        testGoldens('renders $App', (tester) async {
-          /// Set surface size
-          await tester.binding.setSurfaceSize(const Size(400, 800));
-
-          /// Reset surface size
-          addTearDown(() async {
-            await tester.binding.setSurfaceSize(null);
-          });
-
+    group('alchemist', () {
+      goldenTest(
+        'renders $GmailInboxPage',
+        fileName: 'app_alchemist',
+        pumpWidget: (tester, widget) async {
           await mockNetworkImages(() async {
-            await tester.pumpWidget(const App());
+            await tester.pumpWidget(
+              widget,
+            );
           });
-
-          await screenMatchesGolden(
-            tester,
-            'golden_toolkit/app_golden_toolkit',
-          );
-        });
-      });
+        },
+        builder: () => GoldenTestGroup(
+          scenarioConstraints: BoxConstraints.tight(
+            const Size(500, 800),
+          ),
+          children: [
+            GoldenTestScenario(
+              name: 'app',
+              child: const App(),
+            ),
+          ],
+        ),
+      );
     });
   });
 }
