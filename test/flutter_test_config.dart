@@ -31,5 +31,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
     run: testMain,
   );
 */
+  await loadAppFonts();
   return testMain();
 }
