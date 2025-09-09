@@ -231,6 +231,10 @@ class MailItem extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
+            Icon(
+              isFavorite ? Icons.star : Icons.star_border,
+              color: isFavorite ? Colors.yellow.shade700 : Colors.grey,
+            ),
           ],
         ),
       ),
