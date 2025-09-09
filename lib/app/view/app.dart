@@ -172,7 +172,6 @@ class MailItem extends StatelessWidget {
         width: 40,
         height: 40,
         child: CircleAvatar(
-          radius: 20,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Image.network(

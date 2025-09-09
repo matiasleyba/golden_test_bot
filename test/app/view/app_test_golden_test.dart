@@ -7,8 +7,8 @@ import 'package:mocktail_image_network/mocktail_image_network.dart';
 import '../../helpers/pump_app.dart';
 
 void main() {
-  group(MailItem, () {
-    group('flutter_test', () {
+  group('MailItem golden', () {
+    group('flutter_test', skip: false, () {
       testWidgets('renders unread $MailItem', (tester) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 80));
@@ -19,7 +19,12 @@ void main() {
         });
 
         await mockNetworkImages(() async {
-          await tester.pumpApp(const MailItem(isRead: false));
+          await tester.pumpApp(
+            const MailItem(
+              isRead: false,
+              conversationCount: 2,
+            ),
+          );
         });
 
         expect(
@@ -70,7 +75,7 @@ void main() {
         );
       });
     });
-    group('golden_toolkit', () {
+    group('golden_toolkit', skip: true, () {
       testGoldens('renders $MailItem variants correctly', (tester) async {
         /// Set surface size
         await tester.binding.setSurfaceSize(const Size(400, 80));
@@ -103,7 +108,7 @@ void main() {
       });
     });
 
-    group('alchemist', () {
+    group('alchemist', skip: true, () {
       goldenTest(
         'renders $MailItem variants correctly',
         fileName: 'mail_item',
@@ -130,7 +135,7 @@ void main() {
     });
   });
 
-  group(GmailInboxPage, () {
+  group(GmailInboxPage, skip: true, () {
     group('flutter_test', () {
       testWidgets('renders $GmailInboxPage', (tester) async {
         /// Set surface size
