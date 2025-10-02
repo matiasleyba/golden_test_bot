@@ -116,7 +116,7 @@ jobs:
   
       - name: Create or update comment
         if: steps.parse.outputs.added != '0' || steps.parse.outputs.modified != '0' || steps.parse.outputs.removed != '0'
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
