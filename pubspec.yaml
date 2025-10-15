@@ -7,7 +7,7 @@ environment:
   sdk: ^3.8.0
 
 dependencies:
-  alchemist: ^0.12.1
+  alchemist: ^0.13.0
   animated_flip_counter: ^0.3.4
   bloc: ^9.0.0
   flutter:
